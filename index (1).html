@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Sé un Guardián con El Lorax! - Bosque de Trúfula Interactivo</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti for Reward Animations -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@500;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        fun: ['"Fredoka One"', 'cursive'],
+                        sans: ['"Quicksand"', 'sans-serif'],
+                    },
+                    colors: {
+                        trufula: {
+                            pink: '#FF5376',
+                            purple: '#9B51E0',
+                            yellow: '#FFC837',
+                            blue: '#2D9CDB',
+                            orange: '#FF8A00'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(180deg, #E0F7FA 0%, #FFF8E1 50%, #E8F5E9 100%);
+            touch-action: manipulation;
+        }
+
+        /* Animated Background Clouds */
+        .cloud {
+            animation: floatClouds 25s linear infinite;
+        }
+        @keyframes floatClouds {
+            0% { transform: translateX(-150px); }
+            100% { transform: translateX(100vw); }
+        }
+
+        /* Lorax bounce & sway animation */
+        .lorax-sway {
+            animation: sway 3s ease-in-out infinite alternate;
+        }
+        @keyframes sway {
+            0% { transform: rotate(-4deg) translateY(0); }
+            100% { transform: rotate(4deg) translateY(-8px); }
+        }
+
+        .trufula-sway {
+            animation: trufulaSway 4s ease-in-out infinite alternate;
+            transform-origin: bottom center;
+        }
+        @keyframes trufulaSway {
+            0% { transform: rotate(-2deg); }
+            100% { transform: rotate(2deg); }
+        }
+
+        /* Pulse glow effect */
+        .glow-effect {
+            box-shadow: 0 0 20px rgba(255, 138, 0, 0.4);
+        }
+
+        /* Custom scrollbars */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F1F1F1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #FFA726;
+            border-radius: 10px;
+        }
+
+        /* Interactive card hover */
+        .interactive-card {
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .interactive-card:hover {
+            transform: translateY(-6px) scale(1.02);
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 overflow-x-hidden pb-12 selection:bg-amber-300">
+
+    <!-- Ambient Audio / Sound Toggle Header -->
+    <div class="fixed top-4 right-4 z-50 flex gap-2">
+        <button id="sound-btn" onclick="toggleAudio()" class="bg-white/90 backdrop-blur-md border-2 border-amber-400 text-amber-700 px-4 py-2 rounded-full font-bold shadow-lg hover:bg-amber-100 transition flex items-center gap-2 text-sm sm:text-base">
+            <i class="fa-solid fa-music text-amber-500" id="sound-icon"></i>
+            <span id="sound-text">Música y Sonido: ON</span>
+        </button>
+    </div>
+
+    <!-- Floating Clouds -->
+    <div class="fixed top-0 left-0 w-full h-40 pointer-events-none z-0 overflow-hidden">
+        <i class="fa-solid fa-cloud text-white opacity-80 text-7xl absolute cloud" style="top: 15px; animation-delay: 0s;"></i>
+        <i class="fa-solid fa-cloud text-white opacity-60 text-9xl absolute cloud" style="top: 40px; animation-delay: -10s;"></i>
+        <i class="fa-solid fa-cloud text-white opacity-70 text-6xl absolute cloud" style="top: 70px; animation-delay: -18s;"></i>
+    </div>
+
+    <!-- Header Banner -->
+    <header class="relative z-10 text-center pt-8 pb-12 px-4 bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 text-white shadow-2xl rounded-b-[2.5rem] border-b-8 border-amber-600">
+        <div class="max-w-5xl mx-auto relative">
+            <div class="inline-block bg-amber-100/30 backdrop-blur-md px-6 py-2 rounded-full border-2 border-white/50 text-amber-950 font-bold mb-3 shadow-inner text-sm sm:text-base">
+                🌳 ¡Bienvenido al Bosque de Trúfula! 🌳
+            </div>
+            <h1 class="text-4xl sm:text-6xl md:text-7xl font-fun text-amber-950 tracking-wider drop-shadow-md">
+                Hablo por los Árboles
+            </h1>
+            <p class="text-lg sm:text-2xl mt-3 text-amber-900 font-bold max-w-2xl mx-auto drop-shadow-sm">
+                Aprende, juega y conviértete en un Guardián de la Naturaleza junto al Lorax
+            </p>
+            
+            <!-- Quick Navigation Bar -->
+            <nav class="mt-8 flex flex-wrap justify-center gap-3 max-w-4xl mx-auto">
+                <a href="#historia" class="bg-white text-orange-600 hover:bg-orange-50 font-fun px-4 py-2 rounded-full shadow-md transition transform active:scale-95 text-sm sm:text-base">📖 La Historia</a>
+                <a href="#actividades" class="bg-white text-pink-600 hover:bg-pink-50 font-fun px-4 py-2 rounded-full shadow-md transition transform active:scale-95 text-sm sm:text-base">🎮 Mini-Juegos</a>
+                <a href="#juego-memoria" class="bg-white text-amber-600 hover:bg-amber-50 font-fun px-4 py-2 rounded-full shadow-md transition transform active:scale-95 text-sm sm:text-base">🧠 Memoria</a>
+                <a href="#ahorro-energia" class="bg-white text-indigo-600 hover:bg-indigo-50 font-fun px-4 py-2 rounded-full shadow-md transition transform active:scale-95 text-sm sm:text-base">💡 Ahorra Energía</a>
+                <a href="#reciclaje" class="bg-white text-emerald-600 hover:bg-emerald-50 font-fun px-4 py-2 rounded-full shadow-md transition transform active:scale-95 text-sm sm:text-base">♻️ Reciclaje</a>
+                <a href="#cuestionario" class="bg-white text-purple-600 hover:bg-purple-50 font-fun px-4 py-2 rounded-full shadow-md transition transform active:scale-95 text-sm sm:text-base">🧩 Quiz (8 Preguntas)</a>
+                <a href="#certificado" class="bg-white text-yellow-600 hover:bg-yellow-50 font-fun px-4 py-2 rounded-full shadow-md transition transform active:scale-95 text-sm sm:text-base">🎓 Diploma</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 mt-8 space-y-16 relative z-10">
+
+        <!-- SECTION 1: Historia Interactiva & Lorax -->
+        <section id="historia" class="bg-white/90 backdrop-blur-md rounded-3xl p-6 sm:p-10 shadow-2xl border-4 border-amber-300 interactive-card">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                
+                <!-- SVG Avatar & Interactive Speech -->
+                <div class="lg:col-span-5 flex flex-col items-center">
+                    <div class="relative w-64 h-64 bg-gradient-to-b from-amber-200 to-orange-300 rounded-full border-8 border-amber-400 p-4 shadow-xl flex items-center justify-center lorax-sway">
+                        <svg class="w-52 h-52 drop-shadow-md" viewBox="0 0 200 200">
+                            <!-- Lorax Body -->
+                            <circle cx="100" cy="115" r="65" fill="#FF8A00" />
+                            <ellipse cx="100" cy="150" rx="45" ry="25" fill="#FFA726" />
+                            <!-- Eyes -->
+                            <circle cx="80" cy="85" r="14" fill="#FFFFFF" />
+                            <circle cx="80" cy="85" r="6" fill="#0288D1" />
+                            <circle cx="82" cy="83" r="2" fill="#FFFFFF" />
+                            <circle cx="120" cy="85" r="14" fill="#FFFFFF" />
+                            <circle cx="120" cy="85" r="6" fill="#0288D1" />
+                            <circle cx="122" cy="83" r="2" fill="#FFFFFF" />
+                            <!-- Eyebrows -->
+                            <path d="M 60 62 Q 80 45 95 62" fill="none" stroke="#FFD54F" stroke-width="7" stroke-linecap="round" />
+                            <path d="M 105 62 Q 120 45 140 62" fill="none" stroke="#FFD54F" stroke-width="7" stroke-linecap="round" />
+                            <!-- Big Yellow Moustache -->
+                            <path d="M 45 110 Q 100 85 155 110 Q 135 155 100 135 Q 65 155 45 110 Z" fill="#FFD54F" stroke="#FBC02D" stroke-width="3" />
+                            <!-- Nose -->
+                            <ellipse cx="100" cy="98" rx="9" ry="7" fill="#E65100" />
+                            <!-- Arms -->
+                            <path d="M 40 120 Q 20 130 30 150" fill="none" stroke="#FF8A00" stroke-width="12" stroke-linecap="round" />
+                            <path d="M 160 120 Q 180 130 170 150" fill="none" stroke="#FF8A00" stroke-width="12" stroke-linecap="round" />
+                        </svg>
+                    </div>
+                    
+                    <button onclick="loraxSpeak()" class="mt-5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-fun px-6 py-3 rounded-full shadow-lg border-2 border-amber-300 transition active:scale-95 text-lg flex items-center gap-2">
+                        <i class="fa-solid fa-volume-high text-yellow-200 text-xl animate-pulse"></i> ¡Escucha hablar al Lorax! 🗣️
+                    </button>
+                    
+                    <!-- Soundboard con frases icónicas con voz característica -->
+                    <div class="mt-4 flex flex-wrap gap-2 justify-center max-w-sm">
+                        <button onclick="playLoraxAudioPhrase('hablo_arboles')" class="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1 shadow-sm transition">
+                            🗣️ "Yo hablo por los árboles"
+                        </button>
+                        <button onclick="playLoraxAudioPhrase('interese')" class="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1 shadow-sm transition">
+                            🌱 "A menos que alguien como tú..."
+                        </button>
+                        <button onclick="playLoraxAudioPhrase('saludo')" class="bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1 shadow-sm transition">
+                            👋 "¡Hola, soy el Lorax!"
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Story Text, Quote & Embedded Video -->
+                <div class="lg:col-span-7 space-y-5">
+                    <div class="inline-flex items-center gap-2 bg-orange-100 text-orange-700 px-4 py-1.5 rounded-full font-bold text-sm sm:text-base">
+                        <i class="fa-solid fa-tree"></i> La enseñanza de la película
+                    </div>
+                    <h2 class="text-3xl sm:text-4xl font-fun text-amber-900 leading-tight">
+                        "A menos que alguien como tú se interese de verdad, nada va a mejorar."
+                    </h2>
+                    <p class="text-gray-700 text-lg leading-relaxed">
+                        En el hermoso bosque vivían los árboles de <strong>Trúfula</strong>, suaves como la seda y de colores brillantes. Los animales jugaban felices hasta que se cortaron los árboles sin cuidado. El <strong>Lorax</strong> nos enseña que debemos proteger la naturaleza para que los bosques, el aire limpio y los animales sigan existiendo.
+                    </p>
+
+                    <!-- Video Pegado del Lorax -->
+                    <div class="bg-amber-50/90 border-2 border-amber-300 rounded-2xl p-3 sm:p-4 shadow-md">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                            <p class="text-sm font-bold text-amber-900 flex items-center gap-2">
+                                <i class="fa-solid fa-film text-orange-500"></i> Video: ¡El Lorax recogiendo basura y cuidando la calle!
+                            </p>
+                            <label class="cursor-pointer bg-amber-200 hover:bg-amber-300 text-amber-950 text-xs font-bold px-3 py-1 rounded-full transition">
+                                📂 Elegir video manual
+                                <input type="file" accept="video/mp4,video/*" class="hidden" onchange="cargarVideoLocal(event)">
+                            </label>
+                        </div>
+                        <video id="lorax-video" controls playsinline preload="metadata" class="w-full max-h-80 rounded-xl shadow-inner bg-black object-cover">
+                            <source src="video_1.mp4" type="video/mp4">
+                            Tu navegador no soporta la reproducción de videos HTML5.
+                        </video>
+                        <p id="video-error-msg" class="hidden mt-2 text-xs font-bold text-rose-600">
+                            ⚠️ Si no carga automáticamente, asegúrate de que <code>video_1.mp4</code> esté en esta misma carpeta o usa el botón "Elegir video manual".
+                        </p>
+                    </div>
+
+                    <!-- Interactive Quote Card -->
+                    <div id="lorax-speech-bubble" class="bg-amber-50 border-2 border-amber-300 p-5 rounded-2xl relative shadow-inner transition-all duration-300">
+                        <p id="speech-text" class="text-amber-900 font-bold text-lg italic text-center">
+                            "¡Hola! Toca el botón de abajo o el botón del Lorax para escuchar mis consejos para cuidar el planeta."
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- NEW SECTION: MEMORY MATCHING GAME -->
+        <section id="juego-memoria" class="bg-white/95 rounded-3xl p-6 sm:p-10 shadow-2xl border-4 border-amber-400 interactive-card">
+            <div class="text-center space-y-3 mb-8">
+                <span class="bg-amber-100 text-amber-800 px-5 py-1.5 rounded-full font-bold text-sm sm:text-base inline-block">
+                    🧠 Ejercita tu Memoria
+                </span>
+                <h2 class="text-3xl sm:text-5xl font-fun text-amber-900">Juego de Memoria de Trúfula</h2>
+                <p class="text-slate-600 text-base sm:text-lg max-w-xl mx-auto">Encuentra todas las parejas de personajes y elementos del bosque del Lorax.</p>
+                <div class="flex justify-center items-center gap-6 mt-2">
+                    <span class="text-amber-800 font-bold text-lg">Parejas encontradas: <span id="memory-score" class="font-fun text-2xl text-amber-600">0 / 6</span></span>
+                    <button onclick="initMemoryGame()" class="bg-amber-500 hover:bg-amber-600 text-white font-fun px-4 py-2 rounded-full text-sm shadow transition">
+                        🔄 Reiniciar Juego
+                    </button>
+                </div>
+            </div>
+
+            <!-- Memory Grid -->
+            <div id="memory-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-3 sm:gap-4 max-w-2xl mx-auto">
+                <!-- Cards will be injected dynamically -->
+            </div>
+        </section>
+
+        <!-- SECTION 2: INTERACTIVE MINI-GAMES CENTER -->
+        <section id="actividades" class="space-y-12">
+            <div class="text-center space-y-3">
+                <span class="bg-pink-100 text-pink-700 px-5 py-1.5 rounded-full font-bold text-sm sm:text-base inline-block">
+                    🎮 ¡A Jugar y Aprender!
+                </span>
+                <h2 class="text-4xl sm:text-5xl font-fun text-slate-800">Centro de Actividades Interactivas</h2>
+                <p class="text-slate-600 text-lg max-w-2xl mx-auto">Diviértete completando las misiones para reforestar y limpiar el mundo del Lorax.</p>
+            </div>
+
+            <!-- GAME 1: Plant Trufula Forest (Advanced Canvas/SVG System) -->
+            <div class="bg-white/95 rounded-3xl p-6 sm:p-8 shadow-xl border-4 border-pink-300 interactive-card">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                    <div>
+                        <h3 class="text-2xl sm:text-3xl font-fun text-pink-600 flex items-center gap-2">
+                            🌸 Juego 1: ¡Siembra tu Bosque de Trúfulas!
+                        </h3>
+                        <p class="text-gray-600 text-sm sm:text-base">Selecciona un color de copa de árbol y toca la tierra para plantarlo.</p>
+                    </div>
+                    
+                    <div class="flex items-center gap-4 bg-pink-50 p-3 rounded-2xl border border-pink-200">
+                        <div class="text-right">
+                            <span class="block text-xs font-bold text-gray-500 uppercase">Árboles Plantados</span>
+                            <span id="tree-counter" class="text-3xl font-fun text-pink-600">0</span>
+                        </div>
+                        <i class="fa-solid fa-seedling text-3xl text-pink-500"></i>
+                    </div>
+                </div>
+
+                <!-- Tree Color Selector -->
+                <div class="flex flex-wrap items-center justify-center gap-3 mb-4 bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                    <span class="font-bold text-slate-700 text-sm">Elige color de Trúfula:</span>
+                    <button onclick="selectTreeColor('#FF5376', this)" class="color-btn w-9 h-9 rounded-full bg-[#FF5376] border-4 border-white shadow-md ring-2 ring-pink-500 scale-110 transition"></button>
+                    <button onclick="selectTreeColor('#9B51E0', this)" class="color-btn w-9 h-9 rounded-full bg-[#9B51E0] border-4 border-white shadow-md transition"></button>
+                    <button onclick="selectTreeColor('#FFC837', this)" class="color-btn w-9 h-9 rounded-full bg-[#FFC837] border-4 border-white shadow-md transition"></button>
+                    <button onclick="selectTreeColor('#2D9CDB', this)" class="color-btn w-9 h-9 rounded-full bg-[#2D9CDB] border-4 border-white shadow-md transition"></button>
+                    <button onclick="selectTreeColor('#FF8A00', this)" class="color-btn w-9 h-9 rounded-full bg-[#FF8A00] border-4 border-white shadow-md transition"></button>
+                </div>
+
+                <!-- Forest Canvas Area -->
+                <div id="forest-area" class="relative w-full h-80 sm:h-96 bg-gradient-to-b from-sky-300 via-sky-100 to-emerald-200 rounded-2xl border-4 border-emerald-400 cursor-pointer overflow-hidden shadow-inner flex items-end justify-center">
+                    <span id="forest-hint" class="absolute top-1/2 text-emerald-900 font-bold text-lg sm:text-xl bg-white/80 backdrop-blur-sm px-6 py-3 rounded-full border-2 border-emerald-400 shadow-md animate-bounce pointer-events-none">
+                        👇 ¡Haz clic aquí para plantar tu primer árbol! 👇
+                    </span>
+                    <!-- Ground Line -->
+                    <div class="w-full h-12 bg-emerald-500 border-t-4 border-emerald-600 absolute bottom-0"></div>
+                </div>
+
+                <div class="mt-4 flex justify-between items-center">
+                    <button onclick="resetForest()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-5 rounded-full transition text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-rotate-left"></i> Reiniciar Bosque
+                    </button>
+                    <span class="text-xs text-gray-500 italic">* ¡Puedes plantar todos los árboles que quieras!</span>
+                </div>
+            </div>
+
+            <!-- GAME 2: Clean the River & Land (Drag/Click Cleanup) -->
+            <div class="bg-white/95 rounded-3xl p-6 sm:p-8 shadow-xl border-4 border-sky-300 interactive-card">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                    <div>
+                        <h3 class="text-2xl sm:text-3xl font-fun text-sky-600 flex items-center gap-2">
+                            🌊 Juego 2: ¡Limpia el Río y Salva a los Peces!
+                        </h3>
+                        <p class="text-gray-600 text-sm sm:text-base">Toca toda la basura tirada en el río para enviarla al contenedor de reciclaje.</p>
+                    </div>
+
+                    <div class="flex items-center gap-4 bg-sky-50 p-3 rounded-2xl border border-sky-200">
+                        <div class="text-right">
+                            <span class="block text-xs font-bold text-gray-500 uppercase">Basura Recogida</span>
+                            <span id="trash-counter" class="text-3xl font-fun text-sky-600">0 / 8</span>
+                        </div>
+                        <i class="fa-solid fa-trash-can text-3xl text-sky-500"></i>
+                    </div>
+                </div>
+
+                <!-- River Interactive Box -->
+                <div id="river-area" class="relative w-full h-72 sm:h-80 bg-gradient-to-b from-teal-200 via-cyan-300 to-blue-400 rounded-2xl border-4 border-cyan-500 overflow-hidden shadow-inner">
+                    <!-- Fish Swimming Animation Background -->
+                    <div class="absolute inset-0 pointer-events-none overflow-hidden">
+                        <i class="fa-solid fa-fish text-white/50 text-3xl absolute animate-pulse" style="top: 20%; left: 10%;"></i>
+                        <i class="fa-solid fa-fish text-white/50 text-2xl absolute animate-pulse" style="top: 60%; left: 70%;"></i>
+                        <i class="fa-solid fa-fish text-white/50 text-4xl absolute animate-pulse" style="top: 75%; left: 35%;"></i>
+                    </div>
+
+                    <!-- Clean Success Screen -->
+                    <div id="clean-success-modal" class="hidden absolute inset-0 bg-emerald-600/95 backdrop-blur-md flex flex-col items-center justify-center text-white p-6 z-20 text-center">
+                        <div class="text-6xl mb-3 animate-bounce">🐟✨</div>
+                        <h4 class="text-3xl sm:text-4xl font-fun">¡El Río está totalmente limpio!</h4>
+                        <p class="text-lg mt-2 text-emerald-100 max-w-md">Los peces cantarines del Lorax están saltando de felicidad gracias a tu gran trabajo.</p>
+                        <button onclick="initRiverGame()" class="mt-6 bg-yellow-400 hover:bg-yellow-300 text-amber-950 font-fun px-8 py-3 rounded-full text-lg shadow-xl border-2 border-white transition transform active:scale-95">
+                            ⚡ ¡Volver a Jugar!
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- GAME 3: Care for the Swomee-Swans & Bar-ba-loots (Matching Game) -->
+            <div class="bg-white/95 rounded-3xl p-6 sm:p-8 shadow-xl border-4 border-emerald-300 interactive-card">
+                <div class="text-center max-w-2xl mx-auto mb-8">
+                    <h3 class="text-2xl sm:text-3xl font-fun text-emerald-600 flex items-center justify-center gap-2">
+                        🐻 Juego 3: Alimenta y Cuida a los Animales
+                    </h3>
+                    <p class="text-gray-600 text-sm sm:text-base mt-1">Haz clic en cada animal para darle lo que necesita para estar sano y feliz.</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    <!-- Bar-ba-loot Bear -->
+                    <div class="bg-amber-50 rounded-2xl p-5 border-2 border-amber-200 text-center flex flex-col items-center justify-between">
+                        <div class="text-6xl mb-3">🐻</div>
+                        <h4 class="font-fun text-xl text-amber-900">Osito Bar-ba-loot</h4>
+                        <p class="text-xs text-amber-700 mt-1 mb-4">Necesita sus deliciosas frutas de Trúfula para comer.</p>
+                        <button onclick="feedAnimal(this, '🍎 ¡El osito comió feliz!')" class="bg-amber-500 hover:bg-amber-600 text-white font-fun px-4 py-2 rounded-full text-sm shadow transition w-full">
+                            Dar Fruta 🍓
+                        </button>
+                    </div>
+
+                    <!-- Swomee Swan -->
+                    <div class="bg-sky-50 rounded-2xl p-5 border-2 border-sky-200 text-center flex flex-col items-center justify-between">
+                        <div class="text-6xl mb-3">🦢</div>
+                        <h4 class="font-fun text-xl text-sky-900">Cisne Swomee</h4>
+                        <p class="text-xs text-sky-700 mt-1 mb-4">Necesita un aire puro sin humo para poder volar.</p>
+                        <button onclick="feedAnimal(this, '🌬️ ¡El cisne vuela en aire puro!')" class="bg-sky-500 hover:bg-sky-600 text-white font-fun px-4 py-2 rounded-full text-sm shadow transition w-full">
+                            Limpiar Aire ☁️
+                        </button>
+                    </div>
+
+                    <!-- Humming Fish -->
+                    <div class="bg-cyan-50 rounded-2xl p-5 border-2 border-cyan-200 text-center flex flex-col items-center justify-between">
+                        <div class="text-6xl mb-3">🐠</div>
+                        <h4 class="font-fun text-xl text-cyan-900">Pez Cantarín</h4>
+                        <p class="text-xs text-cyan-700 mt-1 mb-4">Necesita agua cristalina para cantar sus canciones.</p>
+                        <button onclick="feedAnimal(this, '🎶 ¡El pez canta su melodía!')" class="bg-cyan-500 hover:bg-cyan-600 text-white font-fun px-4 py-2 rounded-full text-sm shadow transition w-full">
+                            Dar Agua Limpia 💧
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- NEW SECTION: ENERGY SAVER GAME -->
+        <section id="ahorro-energia" class="bg-indigo-900 text-white rounded-3xl p-6 sm:p-10 shadow-2xl relative overflow-hidden border-4 border-indigo-400">
+            <div class="text-center max-w-2xl mx-auto mb-8">
+                <span class="bg-indigo-500/40 text-indigo-200 px-4 py-1.5 rounded-full font-bold text-sm inline-block mb-2 border border-indigo-300/30">
+                    💡 Ahorra Energía en Casa
+                </span>
+                <h2 class="text-3xl sm:text-4xl font-fun">Misión: ¡Apaga las Luces y Ahorra!</h2>
+                <p class="text-indigo-200 text-base mt-2">Toca las luces encendidas y la llave de agua abierta para ahorrar energía y salvar el planeta.</p>
+                <div class="mt-3 inline-block bg-indigo-800/80 px-4 py-1 rounded-full text-sm font-bold text-yellow-300">
+                    Dispositivos encendidos: <span id="energy-counter" class="font-fun text-xl">4 / 4</span>
+                </div>
+            </div>
+
+            <div id="energy-room" class="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto">
+                <!-- Light 1 -->
+                <button onclick="toggleEnergyItem(this)" class="energy-btn bg-yellow-400/20 border-2 border-yellow-300 p-6 rounded-2xl flex flex-col items-center justify-center gap-2 hover:bg-yellow-400/30 transition">
+                    <span class="text-5xl icon-on">💡</span>
+                    <span class="text-sm font-bold text-yellow-200 label-status">Luz Encendida</span>
+                </button>
+                <!-- Light 2 -->
+                <button onclick="toggleEnergyItem(this)" class="energy-btn bg-yellow-400/20 border-2 border-yellow-300 p-6 rounded-2xl flex flex-col items-center justify-center gap-2 hover:bg-yellow-400/30 transition">
+                    <span class="text-5xl icon-on">🛋️</span>
+                    <span class="text-sm font-bold text-yellow-200 label-status">Lámpara Encendida</span>
+                </button>
+                <!-- Faucet -->
+                <button onclick="toggleEnergyItem(this)" class="energy-btn bg-cyan-400/20 border-2 border-cyan-300 p-6 rounded-2xl flex flex-col items-center justify-center gap-2 hover:bg-cyan-400/30 transition">
+                    <span class="text-5xl icon-on">🚰</span>
+                    <span class="text-sm font-bold text-cyan-200 label-status">Agua Corriendo</span>
+                </button>
+                <!-- TV -->
+                <button onclick="toggleEnergyItem(this)" class="energy-btn bg-purple-400/20 border-2 border-purple-300 p-6 rounded-2xl flex flex-col items-center justify-center gap-2 hover:bg-purple-400/30 transition">
+                    <span class="text-5xl icon-on">📺</span>
+                    <span class="text-sm font-bold text-purple-200 label-status">TV Encendido</span>
+                </button>
+            </div>
+
+            <div id="energy-success" class="hidden mt-6 bg-emerald-500/30 border-2 border-emerald-400 p-4 rounded-2xl text-center text-emerald-200 font-bold">
+                🎉 ¡Fantástico! Apagaste todo y ahorraste mucha energía para cuidar el planeta.
+            </div>
+        </section>
+
+        <!-- SECTION 3: RECYCLING WORKSHOP (SORTING INTERACTIVE) -->
+        <section id="reciclaje" class="bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-3xl p-6 sm:p-10 shadow-2xl relative overflow-hidden">
+            <div class="text-center max-w-2xl mx-auto mb-8 relative z-10">
+                <span class="bg-emerald-300/30 backdrop-blur-md text-emerald-100 px-4 py-1.5 rounded-full font-bold text-sm inline-block mb-2 border border-white/30">
+                    ♻️ Aprendizaje Práctico
+                </span>
+                <h2 class="text-3xl sm:text-4xl font-fun">Taller de Clasificación de Basura</h2>
+                <p class="text-emerald-100 text-base mt-2">Arrastra o toca cada residuo hacia el bote correspondiente para mantener el planeta limpio.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+                <!-- Bin 1: Plastic -->
+                <div class="bg-yellow-400/20 backdrop-blur-md rounded-2xl p-5 border-2 border-yellow-300 text-center">
+                    <div class="text-5xl mb-2">🟡</div>
+                    <h3 class="font-fun text-2xl text-yellow-200">Plástico y Latas</h3>
+                    <p class="text-xs text-yellow-100 mt-1 mb-4">Botellas, envases de jugo, latas de refresco.</p>
+                    <div id="bin-plastic" class="bg-yellow-500/30 min-h-[100px] rounded-xl border-2 border-dashed border-yellow-200 p-3 flex flex-wrap gap-2 justify-center items-center">
+                        <span class="text-xs text-yellow-100 italic pointer-events-none">Coloca objetos de plástico aquí</span>
+                    </div>
+                </div>
+
+                <!-- Bin 2: Paper -->
+                <div class="bg-blue-400/20 backdrop-blur-md rounded-2xl p-5 border-2 border-blue-300 text-center">
+                    <div class="text-5xl mb-2">🔵</div>
+                    <h3 class="font-fun text-2xl text-blue-200">Papel y Cartón</h3>
+                    <p class="text-xs text-blue-100 mt-1 mb-4">Cajas, periódicos, hojas de cuadernos.</p>
+                    <div id="bin-paper" class="bg-blue-500/30 min-h-[100px] rounded-xl border-2 border-dashed border-blue-200 p-3 flex flex-wrap gap-2 justify-center items-center">
+                        <span class="text-xs text-blue-100 italic pointer-events-none">Coloca papel o cartón aquí</span>
+                    </div>
+                </div>
+
+                <!-- Bin 3: Organic -->
+                <div class="bg-emerald-400/20 backdrop-blur-md rounded-2xl p-5 border-2 border-emerald-300 text-center">
+                    <div class="text-5xl mb-2">🟢</div>
+                    <h3 class="font-fun text-2xl text-emerald-200">Orgánico</h3>
+                    <p class="text-xs text-emerald-100 mt-1 mb-4">Cascara de fruta, restos de manzana, hojas secas.</p>
+                    <div id="bin-organic" class="bg-emerald-500/30 min-h-[100px] rounded-xl border-2 border-dashed border-emerald-200 p-3 flex flex-wrap gap-2 justify-center items-center">
+                        <span class="text-xs text-emerald-100 italic pointer-events-none">Coloca restos orgánicos aquí</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Items to sort -->
+            <div class="mt-8 bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20 text-center relative z-10">
+                <h4 class="font-fun text-xl text-white mb-4">Toca un objeto para clasificarlo automáticamente:</h4>
+                <div id="recycling-items" class="flex flex-wrap justify-center gap-4">
+                    <button onclick="sortRecycle(this, 'plastic')" class="bg-white text-slate-800 font-bold px-4 py-2 rounded-xl shadow-md hover:scale-110 transition flex items-center gap-2 text-base">
+                        🥤 Botella Plástica
+                    </button>
+                    <button onclick="sortRecycle(this, 'paper')" class="bg-white text-slate-800 font-bold px-4 py-2 rounded-xl shadow-md hover:scale-110 transition flex items-center gap-2 text-base">
+                        📦 Caja de Cartón
+                    </button>
+                    <button onclick="sortRecycle(this, 'organic')" class="bg-white text-slate-800 font-bold px-4 py-2 rounded-xl shadow-md hover:scale-110 transition flex items-center gap-2 text-base">
+                        🍎 Cáscara de Manzana
+                    </button>
+                    <button onclick="sortRecycle(this, 'plastic')" class="bg-white text-slate-800 font-bold px-4 py-2 rounded-xl shadow-md hover:scale-110 transition flex items-center gap-2 text-base">
+                        🥫 Lata de Bebida
+                    </button>
+                    <button onclick="sortRecycle(this, 'paper')" class="bg-white text-slate-800 font-bold px-4 py-2 rounded-xl shadow-md hover:scale-110 transition flex items-center gap-2 text-base">
+                        📰 Periódico Viejo
+                    </button>
+                    <button onclick="sortRecycle(this, 'organic')" class="bg-white text-slate-800 font-bold px-4 py-2 rounded-xl shadow-md hover:scale-110 transition flex items-center gap-2 text-base">
+                        🍌 Cáscara de Plátano
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: 8-QUESTION QUIZ WITH MEDAL REWARD -->
+        <section id="cuestionario" class="bg-white/95 rounded-3xl p-6 sm:p-10 shadow-2xl border-4 border-purple-300 interactive-card">
+            <div class="text-center max-w-3xl mx-auto mb-8">
+                <span class="bg-purple-100 text-purple-700 px-5 py-1.5 rounded-full font-bold text-sm inline-block mb-2">
+                    🧩 Cuestionario Completo (8 Preguntas)
+                </span>
+                <h2 class="text-3xl sm:text-5xl font-fun text-purple-900">¿Cuánto Aprendiste del Lorax?</h2>
+                <p class="text-purple-700 text-lg mt-2">Responde las 8 preguntas correctamente para desbloquear la Medalla de Guardián del Planeta.</p>
+                
+                <!-- Score Indicator -->
+                <div class="mt-4 inline-flex items-center gap-3 bg-purple-50 px-6 py-2 rounded-full border-2 border-purple-200">
+                    <span class="font-bold text-purple-900 text-lg">Puntuación:</span>
+                    <span id="quiz-score" class="font-fun text-3xl text-purple-600">0 / 8</span>
+                </div>
+            </div>
+
+            <!-- Quiz Questions Container -->
+            <div id="quiz-questions" class="space-y-6 max-w-3xl mx-auto">
+                
+                <!-- Question 1 -->
+                <div class="bg-purple-50/60 p-6 rounded-2xl border-2 border-purple-200 shadow-sm transition">
+                    <p class="text-lg sm:text-xl font-bold text-purple-950 mb-4 flex items-start gap-3">
+                        <span class="bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-fun flex-shrink-0">1</span>
+                        ¿Por quién habla el personaje del Lorax en la historia?
+                    </p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <button onclick="answerQuiz(this, false, 1)" class="quiz-btn-1 bg-white hover:bg-purple-100 text-purple-900 p-4 rounded-xl font-bold border-2 border-purple-200 text-left transition flex items-center justify-between">
+                            <span>🤖 Por los robots gigantes</span>
+                            <i class="fa-regular fa-circle text-purple-300"></i>
+                        </button>
+                        <button onclick="answerQuiz(this, true, 1)" class="quiz-btn-1 bg-white hover:bg-purple-100 text-purple-900 p-4 rounded-xl font-bold border-2 border-purple-200 text-left transition flex items-center justify-between">
+                            <span>🌳 Por los árboles y la naturaleza</span>
+                            <i class="fa-regular fa-circle text-purple-300"></i>
+                        </button>
+                    </div>
+                    <p class="feedback-1 hidden mt-3 font-bold text-base text-center rounded-xl p-2"></p>
+                </div>
+
+                <!-- Question 2 -->
+                <div class="bg-purple-50/60 p-6 rounded-2xl border-2 border-purple-200 shadow-sm transition">
+                    <p class="text-lg sm:text-xl font-bold text-purple-950 mb-4 flex items-start gap-3">
+                        <span class="bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-fun flex-shrink-0">2</span>
+                        ¿Cómo eran las copas de los árboles de Trúfula?
+                    </p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <button onclick="answerQuiz(this, true, 2)" class="quiz-btn-2 bg-white hover:bg-purple-100 text-purple-900 p-4 rounded-xl font-bold border-2 border-purple-200 text-left transition flex items-center justify-between">
+                            <span>🌈 Suaves y de colores brillantes</span>
+                            <i class="fa-regular fa-circle text-purple-300"></i>
+                        </button>
+                        <button onclick="answerQuiz(this, false, 2)" class="quiz-btn-2 bg-white hover:bg-purple-100 text-purple-900 p-4 rounded-xl font-bold border-2 border-purple-200 text-left transition flex items-center justify-between">
+                            <span>⬛ Duras y de color gris oscuro</span>
+                            <i class="fa-regular fa-circle text-purple-300"></i>
+                        </button>
+                    </div>
+                    <p class="feedback-2 hidden mt-3 font-bold text-base text-center rounded-xl p-2"></p>
+                </div>
+
+                <!-- Question 3 -->
+                <div class="bg-purple-50/60 p-6 rounded-2xl border-2 border-purple-200 shadow-sm transition">
+                    <p class="text-lg sm:text-xl font-bold text-purple-950 mb-4 flex items-start gap-3">
+                        <span class="bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-fun flex-shrink-0">3</span>
+                        ¿Qué debemos hacer con la llave del agua mientras nos lavamos los dientes?
+                    </p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <button onclick="answerQuiz(this, false, 3)" class="quiz-btn-3 bg-white hover:bg-purple-100 text-purple-900 p-4 rounded-xl font-bold border-2 border-purple-200 text-left transition flex items-center justify-between">
+                            <span>🚿 Dejar correr el agua todo el tiempo</span>
+                            <i class="fa-regular fa-circle text-purple-300"></i>
+                        </button>
+                        <button onclick="answerQuiz(this, true, 3)" class="quiz-btn-3 bg-white hover:bg-purple-100 text-purple-900 p-4 rounded-xl font-bold border-2 border-purple-200 text-left transition flex items-center justify-between">
+                            <span>🚰 Cerrar la llave para ahorrar agua</span>
+                            <i class="fa-regular fa-circle text-purple-300"></i>
+                        </button>
+                    </div>
+                    <p class="feedback-3 hidden mt-3 font-bold text-base text-center rounded-xl p-2"></p>
+                </div>
+
+                <!-- Question 4 -->
+                <div class="bg-purple-50/60 p-6 rounded-2xl border-2 border-purple-200 shadow-sm transition">
+                    <p class="text-lg sm:text-xl font-bold text-purple-950 mb-4 flex items-start gap-3">
+                        <span class="bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-fun flex-shrink-0">4</span>
+                        ¿Dónde debemos tirar las envolturas y basura?
+                    </p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <button onclick="answerQuiz(this, true, 4)" class="quiz-btn-4 bg-white hover:bg-purple-100 text-purple-900 p-4 rounded-xl font-bold border-2 border-purple-200 text-left transition flex items-center justify-between">
+                            <span>🗑️ En el bote de basura o reciclaje</span>
+                            <i class="fa-regular fa-circle text-purple-300"></i>
+                        </button>
+                        <button onclick="answerQuiz(this, false, 4)" class="quiz-btn-4 bg-white hover:bg-purple-100 text-purple-900 p-4 rounded-xl font-bold border-2 border-purple-200 text-left transition flex items-center justify-between">
+                            <span>🍃 Tirarla al suelo o en los ríos</span>
+                            <i class="fa-regular fa-circle text-purple-300"></i>
+                        </button>
+                    </div>
+                    <p class="feedback-4 hidden mt-3 font-bold text-base text-center rounded-xl p-2"></p>
+                </div>
+
+                <!-- Question 5 -->
+                <div class="bg-purple-50/60 p-6 rounded-2xl border-2 border-purple-200 shadow-sm transition">
+                    <p class="text-lg sm:text-xl font-bold text-purple-950 mb-4 flex items-start gap-3">
+                        <span class="bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-fun flex-shrink-0">5</span>
+                        ¿Qué necesitan las semillas para crecer y convertirse en grandes árboles?
+                    </p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <button onclick="answerQuiz(this, true, 5)" class="quiz-btn-5 bg-white hover:bg-purple-100 text-purple-900 p-4 rounded-xl font-bold border-2 border-purple-200 text-left transition flex items-center justify-between">
+                            <span>☀️ Tierra fértil, agua y luz de sol</span>
+                            <i class="fa-regular fa-circle text-purple-300"></i>
+                        </button>
+                        <button onclick="answerQuiz(this, false, 5)" class="quiz-btn-5 bg-white hover:bg-purple-100 text-purple-900 p-4 rounded-xl font-bold border-2 border-purple-200 text-left transition flex items-center justify-between">
+                            <span>🍬 Refrescos y caramelos</span>
+                            <i class="fa-regular fa-circle text-purple-300"></i>
+                        </button>
+                    </div>
+                    <p class="feedback-5 hidden mt-3 font-bold text-base text-center rounded-xl p-2"></p>
+                </div>
+
+                <!-- NEW Question 6 -->
+                <div class="bg-purple-50/60 p-6 rounded-2xl border-2 border-purple-200 shadow-sm transition">
+                    <p class="text-lg sm:text-xl font-bold text-purple-950 mb-4 flex items-start gap-3">
+                        <span class="bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-fun flex-shrink-0">6</span>
+                        ¿Qué pasa cuando apagamos las luces que no usamos?
+                    </p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <button onclick="answerQuiz(this, true, 6)" class="quiz-btn-6 bg-white hover:bg-purple-100 text-purple-900 p-4 rounded-xl font-bold border-2 border-purple-200 text-left transition flex items-center justify-between">
+                            <span>⚡ Ahorramos energía y cuidamos el planeta</span>
+                            <i class="fa-regular fa-circle text-purple-300"></i>
+                        </button>
+                        <button onclick="answerQuiz(this, false, 6)" class="quiz-btn-6 bg-white hover:bg-purple-100 text-purple-900 p-4 rounded-xl font-bold border-2 border-purple-200 text-left transition flex items-center justify-between">
+                            <span>🛋️ No pasa nada de nada</span>
+                            <i class="fa-regular fa-circle text-purple-300"></i>
+                        </button>
+                    </div>
+                    <p class="feedback-6 hidden mt-3 font-bold text-base text-center rounded-xl p-2"></p>
+                </div>
+
+                <!-- NEW Question 7 -->
+                <div class="bg-purple-50/60 p-6 rounded-2xl border-2 border-purple-200 shadow-sm transition">
+                    <p class="text-lg sm:text-xl font-bold text-purple-950 mb-4 flex items-start gap-3">
+                        <span class="bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-fun flex-shrink-0">7</span>
+                        ¿Por qué son importantes las plantas y los árboles?
+                    </p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <button onclick="answerQuiz(this, false, 7)" class="quiz-btn-7 bg-white hover:bg-purple-100 text-purple-900 p-4 rounded-xl font-bold border-2 border-purple-200 text-left transition flex items-center justify-between">
+                            <span>🏗️ Solo sirven para hacer juguetes</span>
+                            <i class="fa-regular fa-circle text-purple-300"></i>
+                        </button>
+                        <button onclick="answerQuiz(this, true, 7)" class="quiz-btn-7 bg-white hover:bg-purple-100 text-purple-900 p-4 rounded-xl font-bold border-2 border-purple-200 text-left transition flex items-center justify-between">
+                            <span>🫁 Nos dan aire puro y limpian el planeta</span>
+                            <i class="fa-regular fa-circle text-purple-300"></i>
+                        </button>
+                    </div>
+                    <p class="feedback-7 hidden mt-3 font-bold text-base text-center rounded-xl p-2"></p>
+                </div>
+
+                <!-- NEW Question 8 -->
+                <div class="bg-purple-50/60 p-6 rounded-2xl border-2 border-purple-200 shadow-sm transition">
+                    <p class="text-lg sm:text-xl font-bold text-purple-950 mb-4 flex items-start gap-3">
+                        <span class="bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-fun flex-shrink-0">8</span>
+                        ¿Quién puede ser un Guardián de la Naturaleza?
+                    </p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <button onclick="answerQuiz(this, true, 8)" class="quiz-btn-8 bg-white hover:bg-purple-100 text-purple-900 p-4 rounded-xl font-bold border-2 border-purple-200 text-left transition flex items-center justify-between">
+                            <span>🌟 ¡Cualquier persona, incluyéndote a ti!</span>
+                            <i class="fa-regular fa-circle text-purple-300"></i>
+                        </button>
+                        <button onclick="answerQuiz(this, false, 8)" class="quiz-btn-8 bg-white hover:bg-purple-100 text-purple-900 p-4 rounded-xl font-bold border-2 border-purple-200 text-left transition flex items-center justify-between">
+                            <span>🦸 Solo los superhéroes de las películas</span>
+                            <i class="fa-regular fa-circle text-purple-300"></i>
+                        </button>
+                    </div>
+                    <p class="feedback-8 hidden mt-3 font-bold text-base text-center rounded-xl p-2"></p>
+                </div>
+
+            </div>
+
+            <!-- UNLOCKED DIPLOMA / REWARD CARD -->
+            <div id="reward-badge" class="hidden mt-10 bg-gradient-to-r from-amber-200 via-amber-100 to-yellow-200 p-8 rounded-3xl border-4 border-amber-400 text-center space-y-4 shadow-2xl relative overflow-hidden">
+                <div class="text-6xl animate-bounce">🎓🏆</div>
+                <h3 class="text-3xl font-fun text-amber-950">¡Felicidades, Guardián del Planeta!</h3>
+                <p class="text-amber-900 font-bold max-w-lg mx-auto">Has completado las misiones y el cuestionario del Lorax. ¡Ahora eres un Guardián Oficial de la Naturaleza!</p>
+                <div class="pt-2">
+                    <input type="text" id="guardian-name" placeholder="Escribe tu nombre aquí" class="px-5 py-3 rounded-full text-center border-2 border-amber-400 font-bold text-amber-900 text-lg shadow-inner focus:outline-none focus:ring-4 focus:ring-amber-300 w-full max-w-xs mb-3">
+                    <br>
+                    <button onclick="generateCertificate()" class="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-fun px-8 py-3 rounded-full text-lg shadow-lg border-2 border-white transition active:scale-95">
+                        📜 Generar mi Diploma
+                    </button>
+                </div>
+            </div>
+
+            <!-- DIPLOMA DISPLAY -->
+            <div id="diploma-card" class="hidden mt-8 bg-white border-8 border-amber-400 rounded-3xl p-8 text-center shadow-2xl relative max-w-2xl mx-auto">
+                <div class="border-4 border-dashed border-amber-300 p-6 rounded-2xl">
+                    <span class="text-amber-600 font-bold tracking-widest text-sm uppercase">Diploma Oficial</span>
+                    <h3 class="text-3xl sm:text-4xl font-fun text-amber-900 mt-2">Guardián de la Naturaleza</h3>
+                    <p class="text-slate-600 my-4 text-base">Este certificado acredita que:</p>
+                    <p id="diploma-name" class="text-3xl font-fun text-orange-600 my-2 underline decoration-amber-400 decoration-wavy">[Tu Nombre]</p>
+                    <p class="text-slate-700 font-bold text-sm sm:text-base max-w-md mx-auto mt-4">
+                        Ha demostrado cuidar los árboles, mantener limpios los ríos y proteger a todos los animales del bosque.
+                    </p>
+                    <div class="mt-6 flex items-center justify-around">
+                        <div class="text-center">
+                            <span class="text-3xl">🌳</span>
+                            <span class="block text-xs font-bold text-slate-500">El Lorax</span>
+                        </div>
+                        <div class="text-center">
+                            <span class="text-4xl">⭐</span>
+                            <span class="block text-xs font-bold text-amber-600 uppercase">Verificado</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <footer class="mt-16 text-center text-amber-900 font-bold text-sm opacity-80">
+        <p>🌳 Inspirado en El Lorax de Dr. Seuss — Dedicado a la Educación Ambiental Infantil 🌍</p>
+    </footer>
+
+    <!-- Audio Effects using Web Audio API & SpeechSynthesis for Lorax Voice -->
+    <script>
+        // Video local fallback handler
+        const loraxVideoEl = document.getElementById('lorax-video');
+        const videoErrorMsg = document.getElementById('video-error-msg');
+
+        if (loraxVideoEl) {
+            loraxVideoEl.addEventListener('error', () => {
+                if (videoErrorMsg) videoErrorMsg.classList.remove('hidden');
+            });
+        }
+
+        function cargarVideoLocal(event) {
+            const file = event.target.files[0];
+            if (!file || !loraxVideoEl) return;
+
+            const urlTemporal = URL.createObjectURL(file);
+            loraxVideoEl.src = urlTemporal;
+            if (videoErrorMsg) videoErrorMsg.classList.add('hidden');
+            loraxVideoEl.load();
+            loraxVideoEl.play().catch(() => {});
+        }
+
+        // Web Audio Synthesizer for Fun Sound Effects & Background Melody
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+        let soundEnabled = true;
+        let musicTimer = null;
+        let isMusicPlaying = false;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new AudioContext();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        // Catch first user click anywhere to initialize audio context smoothly
+        document.addEventListener('click', function initAudioOnUserInteraction() {
+            getAudioContext();
+            if (soundEnabled && !isMusicPlaying) {
+                startBackgroundMusic();
+            }
+        }, { once: true });
+
+        function toggleAudio() {
+            soundEnabled = !soundEnabled;
+            const btnText = document.getElementById('sound-text');
+            const btnIcon = document.getElementById('sound-icon');
+
+            if (soundEnabled) {
+                btnText.innerText = 'Música y Sonido: ON';
+                btnIcon.className = 'fa-solid fa-music text-amber-500';
+                startBackgroundMusic();
+            } else {
+                btnText.innerText = 'Música y Sonido: OFF';
+                btnIcon.className = 'fa-solid fa-volume-xmark text-gray-400';
+                if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            }
+        }
+
+        function playTone(freq, type = 'sine', duration = 0.15, gainVal = 0.1) {
+            if (!soundEnabled) return;
+            try {
+                const ctx = getAudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, ctx.currentTime);
+                gain.gain.setValueAtTime(gainVal, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + duration);
+            } catch(e){}
+        }
+
+        function playPopSound() {
+            playTone(440, 'sine', 0.1, 0.15);
+        }
+
+        function playSuccessSound() {
+            playTone(523.25, 'triangle', 0.12, 0.15);
+            setTimeout(() => playTone(659.25, 'triangle', 0.12, 0.15), 100);
+            setTimeout(() => playTone(783.99, 'triangle', 0.25, 0.15), 200);
+        }
+
+        // Happy background melody synthesizer loop
+        const bgNotes = [261.63, 329.63, 392.00, 523.25, 440.00, 349.23, 392.00, 293.66];
+        let noteIndex = 0;
+
+        function startBackgroundMusic() {
+            if (isMusicPlaying) return;
+            isMusicPlaying = true;
+            musicTimer = setInterval(() => {
+                if (soundEnabled) {
+                    playTone(bgNotes[noteIndex], 'triangle', 0.25, 0.02);
+                    noteIndex = (noteIndex + 1) % bgNotes.length;
+                }
+            }, 600);
+        }
+
+        // --- LORAX VOICE SPEECH SYNTHESIS SYSTEM ---
+        const loraxQuotes = [
+            "¡Hola, amiguito! Yo soy el Lorax y hablo por los árboles. Un pequeño árbol da aire fresco a todos.",
+            "¡No tires basura en los ríos! Los peces cantarines necesitan agua dulce y limpia para poder cantar.",
+            "Cierra bien la llave del agua mientras te cepillas los dientes. ¡Cada gota de agua es pura magia!",
+            "¡Siembra muchas flores y árboles! A los ositos Bar-ba-loot les encantan las frutas de Trúfula.",
+            "¡A menos que alguien como tú se interese de verdad, nada va a mejorar, jamás!",
+            "Apaga las luces cuando salgas de tu habitación. ¡Ahorrar energía cuida nuestro planeta!",
+            "Clasifica tu basura: el plástico, el papel y las frutas van en botes de reciclaje diferentes."
+        ];
+        let currentQuoteIndex = 0;
+
+        function speakWithLoraxVoice(text) {
+            if (!soundEnabled) return;
+
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                
+                utterance.lang = 'es-MX';
+                utterance.pitch = 0.65;
+                utterance.rate = 0.88;
+
+                const voices = window.speechSynthesis.getVoices();
+                const loraxVoice = voices.find(v => 
+                    (v.lang.includes('es') || v.lang.includes('ES')) && 
+                    (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('jorge') || v.name.toLowerCase().includes('pablo') || v.name.toLowerCase().includes('raul') || v.name.toLowerCase().includes('diego') || v.name.toLowerCase().includes('natural'))
+                ) || voices.find(v => v.lang.includes('es'));
+
+                if (loraxVoice) {
+                    utterance.voice = loraxVoice;
+                }
+
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function playLoraxAudioPhrase(phraseKey) {
+            getAudioContext();
+            playPopSound();
+            
+            let text = "";
+            if (phraseKey === 'hablo_arboles') {
+                text = "¡Yo soy el Lorax y yo hablo por los árboles! Porque los árboles no tienen voz.";
+            } else if (phraseKey === 'interese') {
+                text = "A menos que alguien como tú se interese de verdad, nada va a mejorar... jamás.";
+            } else if (phraseKey === 'saludo') {
+                text = "¡Hola! Bienvenido al Bosque de Trúfula. ¡Acompañame a cuidar la naturaleza!";
+            }
+            
+            document.getElementById('speech-text').innerText = `"${text}"`;
+            speakWithLoraxVoice(text);
+        }
+
+        function loraxSpeak() {
+            getAudioContext();
+            playPopSound();
+
+            const quote = loraxQuotes[currentQuoteIndex];
+            const textElem = document.getElementById('speech-text');
+            textElem.innerText = `"${quote}"`;
+
+            speakWithLoraxVoice(quote);
+            currentQuoteIndex = (currentQuoteIndex + 1) % loraxQuotes.length;
+        }
+
+        // --- MEMORY MATCHING GAME ---
+        const memoryCardsData = [
+            { id: 1, icon: '🌳', name: 'Trúfula' },
+            { id: 2, icon: '🐻', name: 'Bar-ba-loot' },
+            { id: 3, icon: 'swan', name: 'Swomee', isSvg: true },
+            { id: 4, icon: '🐠', name: 'Pez' },
+            { id: 5, icon: '🌱', name: 'Semilla' },
+            { id: 6, icon: '✨', name: 'Lorax' }
+        ];
+
+        let memoryDeck = [];
+        let flippedCards = [];
+        let matchedPairs = 0;
+
+        function initMemoryGame() {
+            matchedPairs = 0;
+            flippedCards = [];
+            document.getElementById('memory-score').innerText = `0 / 6`;
+            
+            memoryDeck = [...memoryCardsData, ...memoryCardsData]
+                .sort(() => Math.random() - 0.5);
+
+            const grid = document.getElementById('memory-grid');
+            grid.innerHTML = '';
+
+            memoryDeck.forEach((card, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'memory-card w-full h-24 sm:h-28 bg-amber-400 hover:bg-amber-500 rounded-2xl text-4xl flex items-center justify-center border-4 border-white shadow-lg transition-transform transform active:scale-95';
+                btn.dataset.index = index;
+                btn.dataset.icon = card.icon;
+                btn.innerText = '❓';
+
+                btn.onclick = () => flipMemoryCard(btn, card);
+                grid.appendChild(btn);
+            });
+        }
+
+        function flipMemoryCard(btn, card) {
+            if (flippedCards.length >= 2 || btn.classList.contains('matched') || flippedCards.includes(btn)) return;
+
+            playPopSound();
+            btn.innerText = card.icon === 'swan' ? '🦢' : card.icon;
+            btn.classList.remove('bg-amber-400');
+            btn.classList.add('bg-white');
+            flippedCards.push(btn);
+
+            if (flippedCards.length === 2) {
+                const [card1, card2] = flippedCards;
+                if (card1.dataset.icon === card2.dataset.icon) {
+                    playSuccessSound();
+                    card1.classList.add('matched', 'border-emerald-400', 'bg-emerald-100');
+                    card2.classList.add('matched', 'border-emerald-400', 'bg-emerald-100');
+                    matchedPairs++;
+                    document.getElementById('memory-score').innerText = `${matchedPairs} / 6`;
+                    flippedCards = [];
+
+                    if (matchedPairs === 6) {
+                        setTimeout(() => {
+                            confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+                        }, 300);
+                    }
+                } else {
+                    setTimeout(() => {
+                        card1.innerText = '❓';
+                        card2.innerText = '❓';
+                        card1.classList.remove('bg-white');
+                        card2.classList.remove('bg-white');
+                        card1.classList.add('bg-amber-400');
+                        card2.classList.add('bg-amber-400');
+                        flippedCards = [];
+                    }, 800);
+                }
+            }
+        }
+
+        // --- GAME 1: TREE PLANTING LOGIC ---
+        let treeCount = 0;
+        let selectedColor = '#FF5376';
+
+        function selectTreeColor(color, btnElem) {
+            playPopSound();
+            selectedColor = color;
+            document.querySelectorAll('.color-btn').forEach(btn => {
+                btn.classList.remove('ring-2', 'ring-pink-500', 'scale-110');
+            });
+            btnElem.classList.add('ring-2', 'ring-pink-500', 'scale-110');
+        }
+
+        const forestArea = document.getElementById('forest-area');
+        const treeCounterElem = document.getElementById('tree-counter');
+        const forestHint = document.getElementById('forest-hint');
+
+        if (forestArea) {
+            forestArea.addEventListener('click', function(e) {
+                if (e.target.closest('button')) return;
+
+                if (forestHint) forestHint.style.display = 'none';
+
+                playPopSound();
+
+                const rect = forestArea.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                
+                const tree = document.createElement('div');
+                tree.className = 'absolute bottom-11 flex flex-col items-center trufula-sway transition-transform duration-500';
+                tree.style.left = `${Math.max(20, Math.min(x - 30, rect.width - 60))}px`;
+
+                const treeHeight = Math.floor(Math.random() * 40) + 90;
+
+                tree.innerHTML = `
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-4 border-white shadow-lg flex items-center justify-center transform hover:scale-110 transition" style="background-color: ${selectedColor};">
+                        <div class="w-10 h-10 rounded-full bg-white/20"></div>
+                    </div>
+                    <div class="w-3 bg-gradient-to-r from-amber-700 to-amber-800 rounded-t-sm" style="height: ${treeHeight}px;"></div>
+                `;
+
+                forestArea.appendChild(tree);
+                
+                treeCount++;
+                treeCounterElem.innerText = treeCount;
+
+                if (treeCount % 5 === 0) {
+                    playSuccessSound();
+                }
+            });
+        }
+
+        function resetForest() {
+            playPopSound();
+            const trees = forestArea.querySelectorAll('.trufula-sway');
+            trees.forEach(t => t.remove());
+            treeCount = 0;
+            treeCounterElem.innerText = treeCount;
+            if (forestHint) forestHint.style.display = 'block';
+        }
+
+        // --- GAME 2: RIVER CLEANUP LOGIC ---
+        let trashCollected = 0;
+        const totalTrash = 8;
+        const trashIcons = ['🥤', '🛍️', '📦', '🍾', '🥫', '📰', '🧃', '🛞'];
+        const riverArea = document.getElementById('river-area');
+        const trashCounterElem = document.getElementById('trash-counter');
+        const cleanSuccessModal = document.getElementById('clean-success-modal');
+
+        function initRiverGame() {
+            if (!riverArea) return;
+            trashCollected = 0;
+            trashCounterElem.innerText = `0 / ${totalTrash}`;
+            cleanSuccessModal.classList.add('hidden');
+
+            const existingTrash = riverArea.querySelectorAll('.trash-item');
+            existingTrash.forEach(el => el.remove());
+
+            const rect = riverArea.getBoundingClientRect();
+
+            for (let i = 0; i < totalTrash; i++) {
+                const item = document.createElement('button');
+                item.className = 'trash-item absolute text-3xl sm:text-4xl hover:scale-125 active:scale-95 transition-transform cursor-pointer p-2 z-10 bg-white/40 backdrop-blur-sm rounded-full border border-white/60 shadow-sm';
+                item.innerText = trashIcons[i];
+
+                const posX = Math.random() * Math.max(100, rect.width - 60);
+                const posY = Math.random() * Math.max(100, rect.height - 100) + 10;
+
+                item.style.left = `${posX}px`;
+                item.style.top = `${posY}px`;
+
+                item.onclick = function() {
+                    playPopSound();
+                    item.remove();
+                    trashCollected++;
+                    trashCounterElem.innerText = `${trashCollected} / ${totalTrash}`;
+
+                    if (trashCollected >= totalTrash) {
+                        playSuccessSound();
+                        cleanSuccessModal.classList.remove('hidden');
+                        confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } });
+                    }
+                };
+
+                riverArea.appendChild(item);
+            }
+        }
+
+        // --- ENERGY SAVER GAME LOGIC ---
+        let energyItemsOn = 4;
+        function toggleEnergyItem(btn) {
+            playPopSound();
+            const statusLabel = btn.querySelector('.label-status');
+            
+            if (!btn.classList.contains('off')) {
+                btn.classList.add('off', 'opacity-40', 'bg-gray-700/40', 'border-gray-500');
+                statusLabel.innerText = 'Apagado ✔️';
+                energyItemsOn--;
+            }
+
+            document.getElementById('energy-counter').innerText = `${energyItemsOn} / 4`;
+
+            if (energyItemsOn === 0) {
+                playSuccessSound();
+                document.getElementById('energy-success').classList.remove('hidden');
+            }
+        }
+
+        // --- GAME 3: FEED ANIMALS LOGIC ---
+        function feedAnimal(btn, message) {
+            playSuccessSound();
+            btn.innerText = message;
+            btn.className = 'bg-emerald-500 text-white font-fun px-4 py-2 rounded-full text-sm shadow w-full';
+            btn.disabled = true;
+        }
+
+        // --- RECYCLING WORKSHOP LOGIC ---
+        function sortRecycle(btnElem, type) {
+            playPopSound();
+            const targetBin = document.getElementById(`bin-${type}`);
+            btnElem.remove();
+
+            const newItem = document.createElement('span');
+            newItem.className = 'bg-white text-slate-800 text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm border flex items-center gap-1 animate-bounce';
+            newItem.innerText = btnElem.innerText;
+
+            targetBin.appendChild(newItem);
+
+            const remaining = document.getElementById('recycling-items').children.length;
+            if (remaining === 0) {
+                playSuccessSound();
+                confetti({ particleCount: 60, spread: 70, origin: { y: 0.7 } });
+            }
+        }
+
+        // --- QUIZ LOGIC (8 QUESTIONS) ---
+        let currentQuizScore = 0;
+        let answeredCount = 0;
+        const totalQuizQuestions = 8;
+
+        function answerQuiz(btnElem, isCorrect, questionNum) {
+            const buttons = document.querySelectorAll(`.quiz-btn-${questionNum}`);
+            const feedbackElem = document.querySelector(`.feedback-${questionNum}`);
+
+            buttons.forEach(b => {
+                b.disabled = true;
+                b.classList.add('opacity-60', 'cursor-not-allowed');
+            });
+
+            feedbackElem.classList.remove('hidden');
+
+            if (isCorrect) {
+                playSuccessSound();
+                btnElem.classList.remove('bg-white', 'opacity-60');
+                btnElem.classList.add('bg-emerald-500', 'text-white', 'border-emerald-600');
+                feedbackElem.innerText = '🎉 ¡Excelente! ¡Respuesta Correcta!';
+                feedbackElem.classList.add('bg-emerald-100', 'text-emerald-800');
+                currentQuizScore++;
+            } else {
+                playTone(150, 'sawtooth', 0.2);
+                btnElem.classList.remove('bg-white', 'opacity-60');
+                btnElem.classList.add('bg-rose-400', 'text-white', 'border-rose-500');
+                feedbackElem.innerText = '💡 ¡Casi! Recuerda lo que enseña el Lorax sobre cuidar la naturaleza.';
+                feedbackElem.classList.add('bg-amber-100', 'text-amber-900');
+            }
+
+            answeredCount++;
+            document.getElementById('quiz-score').innerText = `${currentQuizScore} / ${totalQuizQuestions}`;
+
+            if (answeredCount === totalQuizQuestions) {
+                setTimeout(() => {
+                    document.getElementById('reward-badge').classList.remove('hidden');
+                    triggerConfetti();
+                }, 600);
+            }
+        }
+
+        // --- DIPLOMA GENERATOR LOGIC ---
+        function generateCertificate() {
+            const nameInput = document.getElementById('guardian-name').value.trim();
+            if (!nameInput) {
+                alert('Por favor escribe tu nombre para el diploma.');
+                return;
+            }
+
+            playSuccessSound();
+            document.getElementById('diploma-name').innerText = nameInput;
+            document.getElementById('diploma-card').classList.remove('hidden');
+            triggerConfetti();
+        }
+
+        function triggerConfetti() {
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }
+
+        // Initialize games on page load
+        window.onload = function() {
+            initRiverGame();
+            initMemoryGame();
+            
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.onvoiceschanged = () => {
+                    window.speechSynthesis.getVoices();
+                };
+            }
+        };
+    </script>
+</body>
+</html>
